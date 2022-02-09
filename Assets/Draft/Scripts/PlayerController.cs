@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,22 +13,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Sprite m_SpriteRight;
 
     private Transform _Transform;
-    private Vector3 _UpdatePosition;
+    private Vector2 _UpdatePosition;
     private SpriteRenderer m_SpriteRenderer;
 
-
+    private Vector2 _InputMovementPos;
+    
     void Start()
     {
         _Transform = transform;
         _UpdatePosition = transform.position;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
-        Observable.EveryFixedUpdate().Subscribe(_ =>
+
+        InputManager.Instance.OnInputMovement().Subscribe(_=>_InputMovementPos = _).AddTo(this);
+        
+        Observable.EveryUpdate().Subscribe(_ =>
         {
-            var horizontalDir = Mathf.Round(Input.GetAxis("Horizontal"));
-            var verticalDir = Mathf.Round(Input.GetAxis("Vertical"));
-
-
-            var movement = new Vector3(horizontalDir, verticalDir, 0).normalized;
+            
+          
+            var movement  = _InputMovementPos;
             movement *= m_Speed * Time.fixedDeltaTime;
 
             _UpdatePosition += movement;
@@ -35,12 +38,15 @@ public class PlayerController : MonoBehaviour
             _Transform.position = _UpdatePosition;
 
 
-            if (horizontalDir > 0)
+            if (_InputMovementPos.x > 0)
                 m_SpriteRenderer.sprite = m_SpriteRight;
-            else if (horizontalDir < 0)
+            else if (_InputMovementPos.x < 0)
                 m_SpriteRenderer.sprite = m_SpriteLeft;
             else
                 m_SpriteRenderer.sprite = m_SpriteIdle;
+            
+          //  _InputMovementPos = Vector2.zero;
+            
         }).AddTo(this);
     }
 

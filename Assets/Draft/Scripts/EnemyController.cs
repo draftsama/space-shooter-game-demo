@@ -16,7 +16,6 @@ public class EnemyController : MonoBehaviour
         var bullet = other.gameObject.GetComponent<Bullet>();
         if (bullet != null && bullet.GetWhose() == Bullet.Whose.Player)
         {
-            Debug.Log("hit");
             bullet.Terminate();
         }
     }
