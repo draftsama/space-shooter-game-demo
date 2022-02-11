@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 3110367454952307708, guid: 4569169f2049c46a59ed001b91fb5281, type: 3}
-  m_Color: {r: 1, g: 0.40922385, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -118,9 +118,8 @@ GameObject:
   - component: {fileID: 6757706330677358742}
   - component: {fileID: 6757706330677358743}
   - component: {fileID: 3233752103732622192}
-  - component: {fileID: 941614512063395302}
   m_Layer: 0
-  m_Name: missile1
+  m_Name: missile0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -184,7 +183,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 74ead29c8caa04ab4a319e8c58cc4a10, type: 3}
-  m_Color: {r: 0.49056602, g: 0.20594516, b: 0.4721183, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 1
   m_DrawMode: 0
@@ -229,11 +228,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Damage: 200
   m_Shooter: 0
-  m_Speed: 100
-  m_ExplosionFxCreator: {fileID: 941614512063395302}
-  m_ExplosionScale: 1
-  m_TargetTransform: {fileID: 0}
-  m_RotationSpeed: 50
+  m_Speed: 150
+  m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
+  m_TerminateFxSize: 1
+  m_Target: {fileID: 0}
+  m_RotationSpeed: 100
 --- !u!60 &3233752103732622192
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -275,16 +274,3 @@ PolygonCollider2D:
       - {x: 0.110494725, y: -0.15087366}
       - {x: 0.069889516, y: -0.030749347}
       - {x: 0.07094599, y: 0.06748807}
---- !u!114 &941614512063395302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6757706330677358736}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 147c35f1e8600401789d1c20c9600f7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Prefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}

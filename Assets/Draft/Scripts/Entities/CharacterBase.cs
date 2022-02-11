@@ -10,8 +10,11 @@ public class CharacterBase : MonoBehaviour
 {
     [SerializeField] private float m_HealthPower;
     [SerializeField] private bool m_Immortal;
-    [SerializeField] private CharacterType m_CharacterType;
-    [SerializeField] private UnityEvent<CharacterBase> m_OnTerminated;
+    [SerializeField] protected CharacterType m_CharacterType;
+    private Action<CharacterBase> OnTerminatedAction;
+    
+    [SerializeField] private GameObject m_TerminateFxPrefab;
+    [SerializeField] private float m_TerminateFxSize = 1;
     public Transform m_Transform { get; private set; }
      
     public float Width { private set; get; }
@@ -38,15 +41,21 @@ public class CharacterBase : MonoBehaviour
 
     protected virtual  void Terminate()
     {
-        
+        CreateTerminateFx(m_Transform);
     }
+    protected  void CreateTerminateFx(Transform _transform)
+    {
+        var go = ObjectPoolingManager.CreateObject("terminate_fx", m_TerminateFxPrefab, _transform.position, _transform.rotation);
+        go.transform.localScale = Vector3.one * m_TerminateFxSize;
+    }
+  
     public void ReductHealthPower(float _damage)
     {
         m_HealthPower -= _damage;
         if(m_HealthPower <= 0)
         {
             Terminate();
-            m_OnTerminated?.Invoke(this);
+            OnTerminatedAction?.Invoke(this);
         }
     }
 
@@ -91,5 +100,8 @@ public class CharacterBase : MonoBehaviour
         }
     }
 
-    public IObservable<CharacterBase> OnTerminatedAsObservable() => m_OnTerminated.AsObservable<CharacterBase>();
+    public IObservable<CharacterBase> OnTerminatedAsObservable()
+    {
+        return Observable.FromEvent<CharacterBase>(_e => OnTerminatedAction += _e, _e => OnTerminatedAction -= _e);
+    }
 }

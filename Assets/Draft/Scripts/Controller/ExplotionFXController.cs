@@ -12,6 +12,7 @@ public class ExplotionFXController : MonoBehaviour
 
     void OnEnable()
     {
+        transform.rotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0, 360));
         m_Animator = GetComponent<Animator>();
         var trigger = m_Animator.GetBehaviour<ObservableStateMachineTrigger>();
 
@@ -20,18 +21,10 @@ public class ExplotionFXController : MonoBehaviour
             _Disposable?.Dispose();
             _Disposable = trigger.OnStateExitAsObservable().Subscribe(_ =>
             {
-                if (OnTerminate == null)
-                    gameObject.SetActive(false);
-                else
-                    OnTerminate?.Invoke(gameObject);
+                ObjectPoolingManager.Kill(gameObject);
             }).AddTo(this);
         }
     }
 
-    private Action<GameObject> OnTerminate;
-
-    public IObservable<GameObject> OnTerminateAsObservable()
-    {
-        return Observable.FromEvent<GameObject>(_e => OnTerminate += _e, _e => OnTerminate -= _e);
-    }
+  
 }

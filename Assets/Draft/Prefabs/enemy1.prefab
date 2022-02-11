@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6092796354302697900}
   - component: {fileID: 6092796354302697903}
   - component: {fileID: 1490858686637574630}
-  - component: {fileID: 8159417441580306302}
   m_Layer: 0
   m_Name: enemy1
   m_TagString: Enemy
@@ -102,13 +101,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_HealthPower: 1000
+  m_Immortal: 0
   m_CharacterType: 2
-  m_OnTerminated:
-    m_PersistentCalls:
-      m_Calls: []
+  m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
+  m_TerminateFxSize: 1
   m_ShootingOnStart: 0
   m_Projectile: {fileID: 8680832202873207968}
-  m_ExplosionFxCreator: {fileID: 8159417441580306302}
 --- !u!60 &1490858686637574630
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -155,19 +153,6 @@ PolygonCollider2D:
       - {x: 0.12, y: -0.25}
       - {x: 0.13, y: -0.049999997}
       - {x: 0.24, y: -0.049999997}
---- !u!114 &8159417441580306302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6092796354302697902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 147c35f1e8600401789d1c20c9600f7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Prefab: {fileID: 8861688608826317674}
 --- !u!1001 &335198361096208209
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -228,6 +213,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8997734414195213297, guid: a9c2cc29a360c47fead65bef0d7c69b5, type: 3}
+      propertyPath: m_AmmoPrefab
+      value: 
+      objectReference: {fileID: 4408083914677936682, guid: 616ff9453a78d42acb23735dcd95e2c0, type: 3}
+    - target: {fileID: 8997734414195213297, guid: a9c2cc29a360c47fead65bef0d7c69b5, type: 3}
       propertyPath: m_ProjectilePositionTransforms.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -235,7 +224,8 @@ PrefabInstance:
       propertyPath: m_ProjectilePositionTransforms.Array.data[0]
       value: 
       objectReference: {fileID: 297517557997657798}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4104939904810198089, guid: a9c2cc29a360c47fead65bef0d7c69b5, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a9c2cc29a360c47fead65bef0d7c69b5, type: 3}
 --- !u!4 &297517557997657798 stripped
 Transform:
@@ -313,10 +303,5 @@ PrefabInstance:
 --- !u!4 &8861688608826317673 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 528161803607714941, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
-  m_PrefabInstance: {fileID: 9056565720657196820}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8861688608826317674 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
   m_PrefabInstance: {fileID: 9056565720657196820}
   m_PrefabAsset: {fileID: 0}

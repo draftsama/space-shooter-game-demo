@@ -6,7 +6,7 @@ using UnityEngine.Pool;
 
 public class ProjectileBase : MonoBehaviour
 {
-    [SerializeField] protected ObjectPoolCreator m_AmmoCreator;
+    [SerializeField] protected GameObject m_AmmoPrefab;
 
     [SerializeField] protected List<Transform> m_ProjectilePositionTransforms;
     [SerializeField] protected float m_Delay = 0.2f;
@@ -17,7 +17,6 @@ public class ProjectileBase : MonoBehaviour
 
     protected virtual void Start()
     {
-       
     }
     public virtual void Shoot()
     {

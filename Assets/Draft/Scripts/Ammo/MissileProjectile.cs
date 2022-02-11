@@ -7,19 +7,19 @@ using UnityEngine;
 
 public class MissileProjectile : ProjectileBase
 {
-    [SerializeField] private GameObject m_LockTargetPrefab;
-    [SerializeField] private float m_DistanceLockTarget = 3f;
-    [SerializeField] private LockOnTarget[] _LockOnTargets;
-    
-    
+    [SerializeField] private GameObject m_MarkingFxPrefab;
+    [SerializeField] private float m_MarkingLenght = 3f;
+    [SerializeField] private MarkingInfo[] _MarkingInfos;
+
+
     protected override void Start()
     {
         base.Start();
-       
-        _LockOnTargets = new LockOnTarget[m_ProjectilePositionTransforms.Count];
+
+        _MarkingInfos = new MarkingInfo[m_ProjectilePositionTransforms.Count];
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
         {
-            _LockOnTargets[i].m_Projectile = m_ProjectilePositionTransforms[i];
+            _MarkingInfos[i].m_Projectile = m_ProjectilePositionTransforms[i];
         }
     }
 
@@ -28,27 +28,26 @@ public class MissileProjectile : ProjectileBase
     {
         _CountTime = 0;
         _UpdateDisposable?.Dispose();
-        _UpdateDisposable = Observable.EveryUpdate().Subscribe(_ =>
-        {
-            Shoot();
-        }).AddTo(this);
+        _UpdateDisposable = Observable.EveryUpdate().Subscribe(_ => { Shoot(); }).AddTo(this);
     }
 
     public override void Shoot()
     {
+
         if (Time.time - _CountTime < m_Delay) return;
         _CountTime = Time.time;
+       
         FindTarget();
+
 
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
         {
             var projectile = m_ProjectilePositionTransforms[i];
             if (!projectile.gameObject.activeSelf) continue;
 
-            var lockTarget = _LockOnTargets[i];
-            
-            
-            var go =  m_AmmoCreator.Get();
+            var lockTarget = _MarkingInfos[i];
+
+            var go = ObjectPoolingManager.CreateObject($"missile_{GetInstanceID()}", m_AmmoPrefab);
             go.transform.position = projectile.position;
             go.transform.rotation = projectile.rotation;
             var messile = go.GetComponent<Missile>();
@@ -58,73 +57,107 @@ public class MissileProjectile : ProjectileBase
             disposable = messile.OnTerminateAsObservable().Subscribe(_ =>
             {
                 disposable?.Dispose();
-                m_AmmoCreator.Release(_);
+                ObjectPoolingManager.Kill(_);
             }).AddTo(messile);
         }
     }
 
+    public override void StopShoot()
+    {
+        base.StopShoot();
+        ClearMark();
+    }
+
+    public void ClearMark()
+    {
+        Debug.Log("ClearMark");
+
+        for (int i = 0; i < _MarkingInfos.Length; i++)
+        {
+            if (_MarkingInfos[i].m_Target != null)
+            {
+                _MarkingInfos[i].m_Target = null;
+                if (_MarkingInfos[i].m_MarkFx != null)
+                {
+                    ObjectPoolingManager.Kill(_MarkingInfos[i].m_MarkFx);
+                    _MarkingInfos[i].m_MarkFx = null;
+                }
+            }
+        }
+
+        ObjectPoolingManager.KillGroup("locktarget");
+    }
+
     void FindTarget()
     {
-        for (int i = 0; i < _LockOnTargets.Length; i++)
+        //   Debug.Log("find");
+        for (int i = 0; i < _MarkingInfos.Length; i++)
         {
-            if (_LockOnTargets[i].m_Target != null)
+            if (_MarkingInfos[i].m_Target != null)
             {
-                
-                if (!_LockOnTargets[i].m_Target.IsAlive() ||
-                    (_LockOnTargets[i].m_Target.m_Transform.position - _LockOnTargets[i].m_Projectile.position).magnitude >
-                    m_DistanceLockTarget || 
-                    !_LockOnTargets[i].m_Target.IsOnScreen() )
+                //check condition marking
+                if (!_MarkingInfos[i].m_Target.IsAlive() ||
+                    (_MarkingInfos[i].m_Target.m_Transform.position - _MarkingInfos[i].m_Projectile.position)
+                    .magnitude >
+                    m_MarkingLenght ||
+                    !_MarkingInfos[i].m_Target.IsOnScreen())
                 {
-                    _LockOnTargets[i].m_Target = null;
-                    if (_LockOnTargets[i].m_LockTargetFx != null)
+                    _MarkingInfos[i].m_Target = null;
+                    if (_MarkingInfos[i].m_MarkFx != null)
                     {
-                        ObjectPoolingManager.Kill(_LockOnTargets[i].m_LockTargetFx);
-                        _LockOnTargets[i].m_LockTargetFx = null;
+                        ObjectPoolingManager.Kill(_MarkingInfos[i].m_MarkFx);
+                        _MarkingInfos[i].m_MarkFx = null;
                     }
+                }
+                else
+                {
+                    //pass
+                    continue;
                 }
             }
 
-            CharacterBase[] orderTargets = null;
-
+            //find target
+            CharacterBase detectTarget = null;
             if (m_Shooter == CharacterBase.CharacterType.Player)
             {
-                orderTargets = ObjectPoolingManager.GetObjects("enemy")
-                    .OrderBy(_ => (_.m_Transform.position - _LockOnTargets[i].m_Projectile.position).magnitude)
-                    .Select(_ => _.m_Transform.GetComponent<CharacterBase>()).ToArray();
+                detectTarget = ObjectPoolingManager
+                    .GetObjects("enemy")
+                    .OrderBy(_ => (_.m_Transform.position - _MarkingInfos[i].m_Projectile.position).magnitude)
+                    .Select(_ => _.m_Transform.GetComponent<CharacterBase>()).FirstOrDefault(_o =>
+                        !_MarkingInfos.Select(_ => _.m_Target).Contains(_o) && _o.IsAlive() &&
+                        _o.IsOnScreen() &&
+                        (_o.m_Transform.position - _MarkingInfos[i].m_Projectile.position).magnitude <=
+                        m_MarkingLenght);
             }
             else if (m_Shooter == CharacterBase.CharacterType.Enemy)
             {
-                orderTargets = new CharacterBase[1] { PlayerController.Instance };
+                var distance = (PlayerController.Instance.m_Transform.position - _MarkingInfos[i].m_Projectile.position)
+                    .magnitude;
+
+                if (PlayerController.Instance.IsAlive() && PlayerController.Instance.IsOnScreen() &&
+                    distance <= m_MarkingLenght)
+                    detectTarget = PlayerController.Instance;
             }
 
-            for (int j = 0; j < orderTargets.Length; j++)
+            if (detectTarget != null)
             {
-                var target = orderTargets[j];
-                if(!target.gameObject.activeSelf)continue;
-                
-                if (_LockOnTargets.Select(_ => _.m_Target).Contains(target)) continue;
-                if ((target.m_Transform.position - _LockOnTargets[i].m_Projectile.position).magnitude >
-                    m_DistanceLockTarget) continue;
-               if( !target.IsOnScreen())continue;
-               
+                _MarkingInfos[i].m_Target = detectTarget;
 
-                if (_LockOnTargets[i].m_LockTargetFx == null && m_LockTargetPrefab != null && _LockOnTargets[i].m_Target == null)
+                if (_MarkingInfos[i].m_MarkFx == null && m_MarkingFxPrefab != null)
                 {
-                    _LockOnTargets[i].m_Target = target;
-                    _LockOnTargets[i].m_LockTargetFx = ObjectPoolingManager.CreateObject("locktarget",
-                        m_LockTargetPrefab, target.m_Transform.position, target.m_Transform.rotation, target.m_Transform);
+                    _MarkingInfos[i].m_MarkFx = ObjectPoolingManager.CreateObject("locktarget",
+                        m_MarkingFxPrefab, detectTarget.m_Transform.position, detectTarget.m_Transform.rotation,
+                        detectTarget.m_Transform);
                 }
-
-                break;
             }
         }
     }
 
     [System.Serializable]
-    struct LockOnTarget
+    struct MarkingInfo
     {
-        public CharacterBase  m_Target;
+        public CharacterBase m_Target;
         public Transform m_Projectile;
-        public GameObject m_LockTargetFx;
+        public GameObject m_MarkFx;
     }
 }

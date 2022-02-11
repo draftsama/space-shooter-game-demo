@@ -11,8 +11,8 @@ public class AmmoBase : MonoBehaviour
     [SerializeField]public float m_Damage = 100f;
     [SerializeField]protected CharacterBase.CharacterType m_Shooter = CharacterBase.CharacterType.None;
     [SerializeField]protected float m_Speed = 300f;
-    [SerializeField]protected ObjectPoolCreator m_ExplosionFxCreator;
-    [SerializeField]protected float m_ExplosionScale = 0.2f;
+    [SerializeField] private GameObject m_TerminateFxPrefab;
+    [SerializeField] private float m_TerminateFxSize = 1;
     protected Rigidbody2D m_Rigidbody2D;
     protected Transform _Transform;
 
@@ -51,22 +51,15 @@ public class AmmoBase : MonoBehaviour
     {
         return m_Shooter;
     }
-    
+    protected  void CreateTerminateFx(Transform _transform)
+    {
+        var go = ObjectPoolingManager.CreateObject("terminate_fx", m_TerminateFxPrefab, _transform.position, _transform.rotation);
+        go.transform.localScale = Vector3.one * m_TerminateFxSize;
+    }
     public void Terminate()
     {
-        
-        var go = m_ExplosionFxCreator.Get(
-            _Transform.position,Quaternion.Euler(0, 0, UnityEngine.Random.Range(0, 360))
-            ,Vector3.one * m_ExplosionScale);
-        var explosion = go.GetComponent<ExplotionFXController>();
-        IDisposable disposable = null;
-        disposable = explosion.OnTerminateAsObservable().Subscribe(_ =>
-        {
-            disposable?.Dispose();
-            m_ExplosionFxCreator.Release(_);
-        }).AddTo(explosion);
-        
-        
+
+        CreateTerminateFx(_Transform);
         
         OnTerminate?.Invoke(gameObject);
         m_Shooter = CharacterBase.CharacterType.None;

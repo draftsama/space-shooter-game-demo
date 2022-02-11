@@ -10,9 +10,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : CharacterBase
 {
     [SerializeField] private float m_RelifeHP = 1f;
-
     [SerializeField] private float m_Speed = 2f;
-    [SerializeField]protected GameObject m_ExplosionFx;
     
     [Header("Sprite")] [SerializeField] private Sprite m_SpriteIdle;
     [SerializeField] private Sprite m_SpriteLeft;
@@ -96,6 +94,9 @@ public class PlayerController : CharacterBase
             {
                  SetHealthPower(m_RelifeHP);
                 m_BulletProjectile.ShootAuto();
+            //extra
+                m_MissileProjectile.ShootAuto();
+
                 _EnableMove = true;
                 Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ =>
                 {
@@ -127,16 +128,19 @@ public class PlayerController : CharacterBase
         m_MissileProjectile.ShootAuto();
     }
     
+    
     protected override void Terminate()
     {
-        m_ExplosionFx.SetActive(true);
-
-        m_BulletProjectile.StopShoot();
-        m_MissileProjectile.StopShoot();
+        base.Terminate();
+       
+        
         m_SpriteRenderer.enabled = false;
         _Collider2D.enabled = false;
-
-        Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(_ => Relife()).AddTo(this);
+        _Transform.position = new Vector3(0, -7, 0);
+        m_BulletProjectile.StopShoot();
+        m_MissileProjectile.StopShoot();
+        
+        Observable.Timer(TimeSpan.FromMilliseconds(3000)).Subscribe(_ => Relife()).AddTo(this);
        
     }
 
