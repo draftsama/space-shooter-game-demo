@@ -1,16 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Modules.Utilities;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : Singleton<PlayerController>
+public class PlayerController : CharacterBase
 {
+    [SerializeField] private float m_RelifeHP = 1f;
+
     [SerializeField] private float m_Speed = 2f;
     [SerializeField]protected GameObject m_ExplosionFx;
-    [SerializeField]protected float m_ExplosionScale = 0.2f;
     
     [Header("Sprite")] [SerializeField] private Sprite m_SpriteIdle;
     [SerializeField] private Sprite m_SpriteLeft;
@@ -25,10 +27,24 @@ public class PlayerController : Singleton<PlayerController>
     private SpriteRenderer m_SpriteRenderer;
     private Collider2D _Collider2D;
     private Vector2 _InputMovementPos;
-    private bool _IsAlive = false;
-    
-    void Start()
+    private bool _EnableMove;
+
+    public static PlayerController  Instance { get; private set; }
+
+    protected override void Awake()
     {
+        base.Awake();
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        Instance = null;
+    }
+
+    protected override void Start()
+    {
+
         _Transform = transform;
         _UpdatePosition = transform.position;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
@@ -39,9 +55,9 @@ public class PlayerController : Singleton<PlayerController>
         
         Observable.EveryUpdate().Subscribe(_ =>
         {
-            
-          if(_IsAlive)
+          if(IsAlive() && _EnableMove)
           {
+
               var movement = _InputMovementPos;
               movement *= m_Speed * Time.fixedDeltaTime;
 
@@ -63,6 +79,7 @@ public class PlayerController : Singleton<PlayerController>
 
     private void Relife()
     {
+        _EnableMove = false;
         _Transform.position = new Vector3(0, -7, 0);
         m_RelifeSpriteRenderer.color = Color.white;
         _UpdatePosition = new Vector3(0, -3.4f, 0);
@@ -77,8 +94,9 @@ public class PlayerController : Singleton<PlayerController>
                 m_RelifeSpriteRenderer.color = color;
             }, () =>
             {
-                _IsAlive = true;
+                 SetHealthPower(m_RelifeHP);
                 m_BulletProjectile.ShootAuto();
+                _EnableMove = true;
                 Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ =>
                 {
                     _Collider2D.enabled = true;
@@ -108,29 +126,18 @@ public class PlayerController : Singleton<PlayerController>
     {
         m_MissileProjectile.ShootAuto();
     }
-
-    private void OnTriggerEnter2D(Collider2D col)
+    
+    protected override void Terminate()
     {
-        var ammo = col.gameObject.GetComponent<AmmoBase>();
-        if (ammo != null && ammo.GetShooterType() == AmmoBase.Shooter.Enemy)
-        {
-            ammo.Terminate();
-            Terminate();
-            Debug.Log("Die");
+        m_ExplosionFx.SetActive(true);
 
-        }
-    }
-    public void Terminate()
-    {
-        var go = ObjectPoolingManager.CreateObject("explosion.fx", m_ExplosionFx, _Transform.position, Quaternion.Euler(0,0,UnityEngine.Random.Range(0,360)));
-        go.transform.localScale = Vector3.one * m_ExplosionScale;
         m_BulletProjectile.StopShoot();
         m_MissileProjectile.StopShoot();
         m_SpriteRenderer.enabled = false;
         _Collider2D.enabled = false;
-        _IsAlive = false;
 
         Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(_ => Relife()).AddTo(this);
        
     }
+
 }

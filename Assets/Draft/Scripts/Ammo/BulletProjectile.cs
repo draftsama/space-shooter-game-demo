@@ -22,10 +22,17 @@ public class BulletProjectile : ProjectileBase
         _CountTime = Time.time;
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
         {
-            var go = ObjectPoolingManager.CreateObject(m_Prefab.name, m_Prefab, m_ProjectilePositionTransforms[i].position,
-                m_ProjectilePositionTransforms[i].rotation, null);
-
-            go.GetComponent<Bullet>().SetShooterType(m_Shooter);
+          var go =  m_AmmoCreator.Get();
+          go.transform.position = m_ProjectilePositionTransforms[i].position;
+          go.transform.rotation = m_ProjectilePositionTransforms[i].rotation;
+          var bullet = go.GetComponent<Bullet>();
+          IDisposable disposable = null;
+          disposable = bullet.OnTerminateAsObservable().Subscribe(_ =>
+          {
+              disposable?.Dispose();
+              m_AmmoCreator.Release(_);
+          }).AddTo(bullet);
+          bullet.SetShooter(m_Shooter);
         }
     }
 }

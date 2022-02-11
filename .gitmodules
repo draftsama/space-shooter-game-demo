@@ -1,4 +1,4 @@
-[submodule "Assets/unity-utilities"]
-	path = Assets/unity-utilities
+[submodule "Assets/Modules/unity-utilities"]
+	path = Assets/Modules/unity-utilities
 	url = git@github.com:draftsama/unity-utilities.git
 	branch = main

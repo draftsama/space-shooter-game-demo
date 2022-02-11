@@ -20,8 +20,18 @@ public class ExplotionFXController : MonoBehaviour
             _Disposable?.Dispose();
             _Disposable = trigger.OnStateExitAsObservable().Subscribe(_ =>
             {
-                ObjectPoolingManager.KillObject(gameObject);
+                if (OnTerminate == null)
+                    gameObject.SetActive(false);
+                else
+                    OnTerminate?.Invoke(gameObject);
             }).AddTo(this);
         }
+    }
+
+    private Action<GameObject> OnTerminate;
+
+    public IObservable<GameObject> OnTerminateAsObservable()
+    {
+        return Observable.FromEvent<GameObject>(_e => OnTerminate += _e, _e => OnTerminate -= _e);
     }
 }
