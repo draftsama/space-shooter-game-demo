@@ -53,7 +53,7 @@ public class PlayerController : CharacterBase
         
         Observable.EveryUpdate().Subscribe(_ =>
         {
-          if(IsAlive() && _EnableMove)
+          if(IsAlive() && _EnableMove && !GameController.Instance.IsPause)
           {
 
               var movement = _InputMovementPos;

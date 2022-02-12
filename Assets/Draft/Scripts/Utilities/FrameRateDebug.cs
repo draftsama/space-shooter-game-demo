@@ -19,8 +19,8 @@ public class FrameRateDebug : MonoBehaviour
 
     void Update()
     {
+        if (GameController.Instance.IsPause) return;
 
-        
         float newFPS = 1.0f / Time.deltaTime;
         fps = Mathf.Lerp(fps, newFPS, 0.0005f);
         m_FpsText.text = $"FPS: {(int)fps}";

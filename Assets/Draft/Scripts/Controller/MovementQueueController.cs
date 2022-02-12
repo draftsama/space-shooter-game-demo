@@ -51,6 +51,7 @@ public class MovementQueueController : MonoBehaviour
     private Transform _Transform;
 
     private Action<MovementResponse> MovementResponseAction;
+    private Action<Unit> EndMovementAction;
 
     public enum Status
     {
@@ -66,10 +67,11 @@ public class MovementQueueController : MonoBehaviour
 
     }
 
+    public int GetMaxMovement() => m_MovementInfos.Count;
     void Start()
     {
 
-        if (m_PlayOnStart) PlayMovement(m_Loop).Subscribe().AddTo(this);
+        if (m_PlayOnStart) PlayMovement(m_Loop).AddTo(this);
     }
 
     public IObservable<MovementResponse> OnMovementUpdateStatus()
@@ -77,11 +79,15 @@ public class MovementQueueController : MonoBehaviour
         return Observable.FromEvent<MovementResponse>(_e => MovementResponseAction += _e,
             _e => MovementResponseAction -= _e);
     }
-
-    public IObservable<Unit> PlayMovement(bool _loop)
+    public IObservable<Unit> OnEndMovement()
     {
-        return Observable.Create<Unit>(_oberser =>
-        {
+        return Observable.FromEvent<Unit>(_e => EndMovementAction += _e,
+            _e => EndMovementAction -= _e);
+    }
+
+    public IDisposable PlayMovement(bool _loop)
+    {
+      
             float timecount = 0;
             int index = 0;
 
@@ -99,6 +105,7 @@ public class MovementQueueController : MonoBehaviour
                     }
                     else
                     {
+                        EndMovementAction?.Invoke(default);
                         disposable?.Dispose();
                         return;
                     }
@@ -147,8 +154,8 @@ public class MovementQueueController : MonoBehaviour
                     }
                 }
             });
-            return Disposable.Create(() => { disposable?.Dispose(); });
-        });
+
+            return disposable;
     }
 
     public void AddMovement(Vector3 _vector3)

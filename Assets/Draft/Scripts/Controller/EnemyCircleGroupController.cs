@@ -8,7 +8,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class EnemyCircleGroup : MonoBehaviour
+public class EnemyCircleGroupController : GameEventBase
 {
     //TODO Enemy pattern
 
@@ -18,47 +18,29 @@ public class EnemyCircleGroup : MonoBehaviour
     [SerializeField] private float m_Radius = 2f;
     [SerializeField] private int m_Max = 6;
     [SerializeField] private float m_Speed = 16f;
+    
     [SerializeField] private MovementQueueController m_MovementQueueController;
+    [SerializeField] private bool m_LoopMovement = false;
 
     private float _Axis = 0;
     private float _AnglePart = 0;
     private Transform _Transform;
 
     private List<EnemyController> m_EnemyList;
-
-
+    
+    
     void Start()
     {
        
         
         _Transform = transform;
-        _AnglePart = 360f / m_Max;
-        m_EnemyList = new List<EnemyController>(m_Max);
-        for (int i = 0; i < m_Max; i++)
-        {
-            var rot = Quaternion.Euler(0, 0, (_AnglePart * i) + _Axis);
+        InitEnemy();
 
-
-            var go = ObjectPoolingManager.CreateObject("enemy", m_Prefab, Vector3.zero, Quaternion.identity, null);
-            
-            go.transform.position = rot * new Vector3(0, m_Radius, 0) + _Transform.position;
-            go.name = $"enemy{i}";
-            var enemy = go.GetComponent<EnemyController>();
-            enemy.SetHealthPower(m_Health);
-
-           
-            enemy.OnTerminatedAsObservable().Subscribe(_e =>
-            {
-                _e.gameObject.SetActive(false);
-            }).AddTo(enemy);
-            m_EnemyList.Add(enemy);
-        }
-
-        m_MovementQueueController.PlayMovement(true).Subscribe().AddTo(this);
         m_MovementQueueController.OnMovementUpdateStatus().Subscribe(_response =>
         {
-           // Debug.Log($"response > index:{_response.m_index} - status:{_response.m_Status}");
+            //  Debug.Log($"response > index:{_response.m_index} - status:{_response.m_Status}");
 
+          //enemy shoting manager
             if ( _response.m_Status == MovementQueueController.Status.End)
             {
                 if(_response.m_index == 1 || _response.m_index == 3 )
@@ -73,21 +55,55 @@ public class EnemyCircleGroup : MonoBehaviour
            
             
         }).AddTo(this);
+
+        m_MovementQueueController.OnEndMovement().Subscribe(_ => StopEvent()).AddTo(this);
+    }
+    
+    private void InitEnemy()
+    {
+        _AnglePart = 360f / m_Max;
+        
+        m_EnemyList = new List<EnemyController>(m_Max);
+        for (int i = 0; i < m_Max; i++)
+        {
+            var rot = Quaternion.Euler(0, 0, (_AnglePart * i) + _Axis);
+            
+            var go = ObjectPoolingManager.CreateObject("enemy", m_Prefab, Vector3.zero, Quaternion.identity, null);
+            
+            go.transform.position = rot * new Vector3(0, m_Radius, 0) + _Transform.position;
+            go.name = $"enemy{i}";
+            var enemy = go.GetComponent<EnemyController>();
+            enemy.SetHealthPower(m_Health);
+            enemy.OnTerminatedAsObservable().Subscribe(_e =>
+            {
+                _e.gameObject.SetActive(false);
+            }).AddTo(enemy);
+            m_EnemyList.Add(enemy);
+        } 
+        
+        foreach (var enemy in m_EnemyList)
+        {
+            enemy.gameObject.SetActive(false);
+        }
     }
 
-
-    private void Update()
+    private void RelifeEnemy()
+    {
+        foreach (var enemy in m_EnemyList)
+        {
+            enemy.SetHealthPower(m_Health); 
+            enemy.gameObject.SetActive(true);
+        }
+    }
+    private void EnemyMovementRunning()
     { 
 
         if (m_EnemyList.FirstOrDefault(_ => _.IsAlive()) == null)
         {
             //when no more enemy is alive 
-            for (int i = 0; i < m_EnemyList.Count; i++)
-            {
-                var enemy = m_EnemyList[i];
-                enemy.SetHealthPower(m_Health); 
-                enemy.gameObject.SetActive(true);
-            }
+
+            StopEvent();
+            
         }
 
         _Axis += Time.deltaTime * m_Speed;
@@ -175,4 +191,25 @@ public class EnemyCircleGroup : MonoBehaviour
         _ScaleAnimationDisposable = LerpThread.FloatLerp(500, m_Radius, _OldRadius).Subscribe(_ => { m_Radius = _; })
             .AddTo(this);
     }
+
+    private CompositeDisposable _CompositeDisposable;
+    private GameEventBase m_GameEventBaseImplementation;
+
+    public override void StartEvent()
+    {
+        _CompositeDisposable?.Dispose();
+        _CompositeDisposable = new CompositeDisposable();
+        _CompositeDisposable.Add(m_MovementQueueController.PlayMovement(m_LoopMovement).AddTo(this));
+        RelifeEnemy();
+        _CompositeDisposable.Add(Observable.EveryUpdate().Subscribe( _ =>EnemyMovementRunning()).AddTo(this)); 
+    }
+
+    public override void StopEvent()
+    {
+        base.StopEvent();
+        _CompositeDisposable?.Dispose();
+        
+    }
+
+   
 }
