@@ -8,7 +8,7 @@ using UniRx;
 
 public class CharacterBase : MonoBehaviour
 {
-    [SerializeField] private float m_HealthPower;
+    [SerializeField] private float m_HealthPower = 100;
     [SerializeField] private bool m_Immortal;
     [SerializeField] protected CharacterType m_CharacterType;
     private Action<CharacterBase> OnTerminatedAction;
@@ -28,6 +28,7 @@ public class CharacterBase : MonoBehaviour
     protected virtual void Awake()
     {
         m_Transform = transform;
+        if (m_HealthPower <= 0) m_HealthPower = 1;
         var poly = GetComponent<PolygonCollider2D>();
         var pointXs = poly.points.Select(_ => _.x).ToArray();
         var pointYs = poly.points.Select(_ => _.y).ToArray();
@@ -86,8 +87,7 @@ public class CharacterBase : MonoBehaviour
     {
         var ammo = col.gameObject.GetComponent<AmmoBase>();
         if (ammo != null)
-        {      
-
+        {
             if (ammo.GetShooterType() == CharacterType.Player && m_CharacterType == CharacterType.Enemy || 
                 ammo.GetShooterType() == CharacterType.Enemy && m_CharacterType == CharacterType.Player)
             {
@@ -97,6 +97,14 @@ public class CharacterBase : MonoBehaviour
             }
             
 
+        }
+        
+        var characterBase = col.gameObject.GetComponent<CharacterBase>();
+        if (characterBase != null && m_CharacterType == CharacterType.Player &&
+            characterBase.m_CharacterType == CharacterType.Enemy)
+        {
+            if(!m_Immortal)
+                ReductHealthPower(m_HealthPower);
         }
     }
 

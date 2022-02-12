@@ -29,14 +29,14 @@ public class Missile : AmmoBase
         base.FixedUpdate();
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        var ammo = other.gameObject.GetComponent<AmmoBase>();
-        if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy)
-        {
-            ammo.Terminate();
-            Terminate();
-
-        }
-    }
+    // private void OnTriggerEnter2D(Collider2D other)
+    // {
+    //     var ammo = other.gameObject.GetComponent<AmmoBase>();
+    //     if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy)
+    //     {
+    //         ammo.Terminate();
+    //         Terminate();
+    //
+    //     }
+    // }
 }

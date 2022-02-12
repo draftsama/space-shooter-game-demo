@@ -73,7 +73,7 @@ public class MovementQueueController : MonoBehaviour
 
         if (m_PlayOnStart) PlayMovement(m_Loop).AddTo(this);
     }
-
+    
     public IObservable<MovementResponse> OnMovementUpdateStatus()
     {
         return Observable.FromEvent<MovementResponse>(_e => MovementResponseAction += _e,
@@ -85,6 +85,10 @@ public class MovementQueueController : MonoBehaviour
             _e => EndMovementAction -= _e);
     }
 
+    public void ResetPosition()
+    {
+        _Transform.position = m_MovementInfos[0].m_PositionTarget;
+    }
     public IDisposable PlayMovement(bool _loop)
     {
       

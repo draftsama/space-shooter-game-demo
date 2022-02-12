@@ -26,7 +26,7 @@ public class MissileProjectile : ProjectileBase
 
     public override void ShootAuto()
     {
-        _CountTime = 0;
+        _CountTime = -1;
         _UpdateDisposable?.Dispose();
         _UpdateDisposable = Observable.EveryUpdate().Subscribe(_ => { Shoot(); }).AddTo(this);
     }
@@ -34,7 +34,7 @@ public class MissileProjectile : ProjectileBase
     public override void Shoot()
     {
 
-        if (Time.time - _CountTime < m_Delay) return;
+        if (Time.time - _CountTime < m_Delay && _CountTime > 0) return;
         _CountTime = Time.time;
        
         FindTarget();

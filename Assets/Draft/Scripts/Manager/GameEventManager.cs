@@ -18,17 +18,24 @@ public class GameEventManager : MonoBehaviour
 
     void PlayGameEvent(int _index)
     {
+        m_Index = _index;
         _CurrentEvent = m_GameEventInfoList[m_Index];
-        Observable.Timer(TimeSpan.FromMilliseconds(_CurrentEvent.m_Delay)).Subscribe(_ =>
+        Debug.Log(_CurrentEvent.m_GameEventHandler.name);
+        IDisposable disposable = null;
+
+        disposable = Observable.Timer(TimeSpan.FromMilliseconds(_CurrentEvent.m_Delay)).Subscribe(_ =>
         {
+            disposable?.Dispose();
+
             _CurrentEvent.m_GameEventHandler.StartEvent();
-            _CurrentEvent.m_GameEventHandler.OnStopEventAsObservable().Subscribe(_ =>
-            {          
+            disposable =  _CurrentEvent.m_GameEventHandler.OnStopEventAsObservable().Subscribe(_ =>
+            {        
+                disposable?.Dispose();
                 _index++;
                 if (_index < m_GameEventInfoList.Count)
                 {
                     //next
-                    Debug.Log("Next Event");
+                    Debug.Log($"Next Event {_index}");
                     PlayGameEvent(_index);
                 }
                 else

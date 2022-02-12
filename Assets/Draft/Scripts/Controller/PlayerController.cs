@@ -16,6 +16,8 @@ public class PlayerController : CharacterBase
     [SerializeField] private Sprite m_SpriteLeft;
     [SerializeField] private Sprite m_SpriteRight;
     [SerializeField] private SpriteRenderer m_RelifeSpriteRenderer;
+    [SerializeField] private SpriteRenderer m_ShieldSpriteRenderer;
+
     [Header("Projectile")]
     [SerializeField] private BulletProjectile m_BulletProjectile;
     [SerializeField] private MissileProjectile m_MissileProjectile;
@@ -42,7 +44,6 @@ public class PlayerController : CharacterBase
 
     protected override void Start()
     {
-
         _Transform = transform;
         _UpdatePosition = transform.position;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
@@ -55,14 +56,12 @@ public class PlayerController : CharacterBase
         {
           if(IsAlive() && _EnableMove && !GameController.Instance.IsPause)
           {
-
               var movement = _InputMovementPos;
               movement *= m_Speed * Time.fixedDeltaTime;
 
               _UpdatePosition += movement;
               _UpdatePosition = ClampAreaScreen(_UpdatePosition);
               _Transform.position = _UpdatePosition;
-
 
               if (_InputMovementPos.x > 0)
                   m_SpriteRenderer.sprite = m_SpriteRight;
@@ -78,8 +77,10 @@ public class PlayerController : CharacterBase
     private void Relife()
     {
         _EnableMove = false;
+        
         _Transform.position = new Vector3(0, -7, 0);
         m_RelifeSpriteRenderer.color = Color.white;
+        m_ShieldSpriteRenderer.color = Color.white;
         _UpdatePosition = new Vector3(0, -3.4f, 0);
         _Transform.LerpPosition(1000, _UpdatePosition,false).Subscribe(_ =>
         {
@@ -93,14 +94,25 @@ public class PlayerController : CharacterBase
             }, () =>
             {
                  SetHealthPower(m_RelifeHP);
-                m_BulletProjectile.ShootAuto();
+             //   m_BulletProjectile.ShootAuto();
             //extra
-                m_MissileProjectile.ShootAuto();
+              //  m_MissileProjectile.ShootAuto();
 
                 _EnableMove = true;
-                Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ =>
+                Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(_ =>
                 {
-                    _Collider2D.enabled = true;
+                    var shieldColor = m_ShieldSpriteRenderer.color;
+
+                    LerpThread.FloatLerp(300, 1, 0).Subscribe(_value =>
+                    {
+                        shieldColor.a = _value;
+                        m_ShieldSpriteRenderer.color = shieldColor;
+                    }, () =>
+                    {      
+                        _Collider2D.enabled = true;
+
+                    });
+
 
                 }).AddTo(this);
 
@@ -132,8 +144,7 @@ public class PlayerController : CharacterBase
     protected override void Terminate()
     {
         base.Terminate();
-       
-        
+
         m_SpriteRenderer.enabled = false;
         _Collider2D.enabled = false;
         _Transform.position = new Vector3(0, -7, 0);

@@ -101,7 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Damage: 50
   m_Shooter: 0
-  m_Speed: 200
+  m_Speed: 150
   m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
   m_TerminateFxSize: 0.2
 --- !u!50 &4408083914677936681

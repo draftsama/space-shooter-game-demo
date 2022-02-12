@@ -136,11 +136,10 @@ public class EnemyCircleGroupController : GameEventBase
 
     private IDisposable _ShootDisposable;
 
-    public void ShootPattern1(float _delay = 0, int _loopTarget = 1)
+    public void ShootPattern1(float _delay = 0, int _loopTarget = 1,float repeatTime = 0.025f)
     {
         _ShootDisposable?.Dispose();
         var index = 0;
-        var repeatTime = 0.02f;
         var countDown =_delay;
         var loopCount = 0;
       
@@ -160,14 +159,21 @@ public class EnemyCircleGroupController : GameEventBase
                     countDown = repeatTime;
                     loopCount++;
                     if (loopCount >= _loopTarget)
+                    {
                         _ShootDisposable?.Dispose();
+                        return;
+                    }
                 }
                 else
                 {
                     countDown = repeatTime;
                 }
 
-                if (m_EnemyList.Count == 0) _ShootDisposable?.Dispose();
+                if (m_EnemyList.Count == 0)
+                {
+                    _ShootDisposable?.Dispose();
+                    return;
+                }
                 m_EnemyList[index].Shoot();
                 index++;
             }
@@ -207,6 +213,13 @@ public class EnemyCircleGroupController : GameEventBase
     public override void StopEvent()
     {
         base.StopEvent();
+        
+        m_MovementQueueController.ResetPosition();
+        foreach (var enemy in m_EnemyList)
+        {
+            enemy.transform.position = _Transform.position;
+            enemy.gameObject.SetActive(false);
+        }
         _CompositeDisposable?.Dispose();
         
     }

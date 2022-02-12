@@ -8,7 +8,7 @@ public class BulletProjectile : ProjectileBase
 {
     public override void ShootAuto()
     {
-        _CountTime = 0;
+        _CountTime = -1;
         _UpdateDisposable?.Dispose();
         _UpdateDisposable = Observable.EveryUpdate().Subscribe(_ =>
         {
@@ -18,10 +18,14 @@ public class BulletProjectile : ProjectileBase
 
     public override void Shoot()
     {
-        if(Time.time - _CountTime < m_Delay) return;
+        Debug.Log("Shoot>>>>>");
+
+        if(Time.time - _CountTime < m_Delay && _CountTime > 0) return;
         _CountTime = Time.time;
+
+        Debug.Log("<<<<<Shoot");
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
-        {
+        { 
             var go = ObjectPoolingManager.CreateObject($"bullet_{GetInstanceID()}", m_AmmoPrefab);
           go.transform.position = m_ProjectilePositionTransforms[i].position;
           go.transform.rotation = m_ProjectilePositionTransforms[i].rotation;
