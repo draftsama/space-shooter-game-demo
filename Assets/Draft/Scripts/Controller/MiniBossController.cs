@@ -4,11 +4,10 @@ using Modules.Utilities;
 using UniRx;
 using UnityEngine;
 
-public class EnemyDropItemController : GameEventBase
+public class MiniBossController : GameEventBase
 {
     [SerializeField] private GameObject m_Prefab;
     [SerializeField] private float m_HealthPower;
-    [SerializeField] private GameObject m_ItemPrefab;
     [SerializeField] private MovementQueueController m_MovementQueueController;
 
     private Transform _Transform;
@@ -35,7 +34,6 @@ public class EnemyDropItemController : GameEventBase
         enemy.OnTerminatedAsObservable().Subscribe(_ =>
         {
             _EnemyObj.SetActive(false);
-           var go = ObjectPoolingManager.CreateObject($"{m_ItemPrefab.name}_item", m_ItemPrefab,_Transform.position,_Transform.rotation);
            StopEvent();
         }).AddTo(this);
         _CompositeDisposable.Add(Observable.EveryUpdate().Subscribe(_ =>

@@ -5,11 +5,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UniRx;
+using UniRx.Triggers;
 
 public class CharacterBase : MonoBehaviour
 {
     [SerializeField] private float m_HealthPower = 100;
-    [SerializeField] private bool m_Immortal;
+    [SerializeField] protected bool m_Immortal;
     [SerializeField] protected CharacterType m_CharacterType;
     private Action<CharacterBase> OnTerminatedAction;
     
@@ -29,12 +30,37 @@ public class CharacterBase : MonoBehaviour
     {
         m_Transform = transform;
         if (m_HealthPower <= 0) m_HealthPower = 1;
-        var poly = GetComponent<PolygonCollider2D>();
+        var poly = GetComponentInChildren<PolygonCollider2D>();
         var pointXs = poly.points.Select(_ => _.x).ToArray();
         var pointYs = poly.points.Select(_ => _.y).ToArray();
         
         Width = pointXs.Max() - pointXs.Min();
         Height = pointYs.Max() - pointYs.Min();
+
+        poly.OnTriggerEnter2DAsObservable().Subscribe(_col =>
+        {
+            var ammo = _col.gameObject.GetComponent<AmmoBase>();
+            if (ammo != null)
+            {
+                if (ammo.GetShooterType() == CharacterType.Player && m_CharacterType == CharacterType.Enemy || 
+                    ammo.GetShooterType() == CharacterType.Enemy && m_CharacterType == CharacterType.Player)
+                {
+                    ammo.Terminate();
+                    if(!m_Immortal)
+                        ReductHealthPower(ammo.m_Damage);
+                }
+            
+
+            }
+        
+            var characterBase = _col.gameObject.GetComponent<CharacterBase>();
+            if (characterBase != null && m_CharacterType == CharacterType.Player &&
+                characterBase.m_CharacterType == CharacterType.Enemy)
+            {
+                if(!m_Immortal)
+                    ReductHealthPower(m_HealthPower);
+            }
+        }).AddTo(this);
     }
     protected virtual void Start()
     {
@@ -42,6 +68,7 @@ public class CharacterBase : MonoBehaviour
 
     protected virtual  void Terminate()
     {
+        m_HealthPower = 0;
         CreateTerminateFx(m_Transform);
     }
     protected  void CreateTerminateFx(Transform _transform)
@@ -85,27 +112,7 @@ public class CharacterBase : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D col)
     {
-        var ammo = col.gameObject.GetComponent<AmmoBase>();
-        if (ammo != null)
-        {
-            if (ammo.GetShooterType() == CharacterType.Player && m_CharacterType == CharacterType.Enemy || 
-                ammo.GetShooterType() == CharacterType.Enemy && m_CharacterType == CharacterType.Player)
-            {
-                ammo.Terminate();
-                if(!m_Immortal)
-                   ReductHealthPower(ammo.m_Damage);
-            }
-            
-
-        }
-        
-        var characterBase = col.gameObject.GetComponent<CharacterBase>();
-        if (characterBase != null && m_CharacterType == CharacterType.Player &&
-            characterBase.m_CharacterType == CharacterType.Enemy)
-        {
-            if(!m_Immortal)
-                ReductHealthPower(m_HealthPower);
-        }
+       
     }
 
     public IObservable<CharacterBase> OnTerminatedAsObservable()

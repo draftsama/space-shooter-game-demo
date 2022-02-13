@@ -232,7 +232,7 @@ MonoBehaviour:
   m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
   m_TerminateFxSize: 1
   m_Target: {fileID: 0}
-  m_RotationSpeed: 50
+  m_RotationSpeed: 150
 --- !u!60 &3233752103732622192
 PolygonCollider2D:
   m_ObjectHideFlags: 0

@@ -121,7 +121,7 @@ public class MissileProjectile : ProjectileBase
             if (m_Shooter == CharacterBase.CharacterType.Player)
             {
                 detectTarget = ObjectPoolingManager
-                    .GetObjects("enemy")
+                    .GetObjects().Where(_ => _.m_GameObject.GetComponent<EnemyController>() != null)
                     .OrderBy(_ => (_.m_Transform.position - _MarkingInfos[i].m_Projectile.position).magnitude)
                     .Select(_ => _.m_Transform.GetComponent<CharacterBase>()).FirstOrDefault(_o =>
                         !_MarkingInfos.Select(_ => _.m_Target).Contains(_o) && _o.IsAlive() &&
@@ -146,8 +146,8 @@ public class MissileProjectile : ProjectileBase
                 if (_MarkingInfos[i].m_MarkFx == null && m_MarkingFxPrefab != null)
                 {
                     _MarkingInfos[i].m_MarkFx = ObjectPoolingManager.CreateObject("locktarget",
-                        m_MarkingFxPrefab, detectTarget.m_Transform.position, detectTarget.m_Transform.rotation,
-                        detectTarget.m_Transform);
+                        m_MarkingFxPrefab, detectTarget.m_Transform.position, detectTarget.m_Transform.rotation,detectTarget.m_Transform);
+
                 }
             }
         }

@@ -26,17 +26,21 @@ public class Missile : AmmoBase
             var rotAmount = -Vector3.Cross(direction.normalized, up).z;
             m_Rigidbody2D.angularVelocity = rotAmount * m_RotationSpeed;
         }
+        else
+        {
+            m_Rigidbody2D.angularVelocity = 0;
+        }
         base.FixedUpdate();
     }
 
-    // private void OnTriggerEnter2D(Collider2D other)
-    // {
-    //     var ammo = other.gameObject.GetComponent<AmmoBase>();
-    //     if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy)
-    //     {
-    //         ammo.Terminate();
-    //         Terminate();
-    //
-    //     }
-    // }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        var ammo = other.gameObject.GetComponent<AmmoBase>();
+        if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy && ammo.GetShooterType() == CharacterBase.CharacterType.Player)
+        {
+            ammo.Terminate();
+            Terminate();
+    
+        }
+    }
 }

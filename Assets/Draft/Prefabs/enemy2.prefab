@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &413363881509963011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7896696550580854238}
+  m_Layer: 0
+  m_Name: p4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7896696550580854238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 413363881509963011}
+  m_LocalRotation: {x: 0, y: 0, z: -0.89493436, w: 0.44619772}
+  m_LocalPosition: {x: 0.4, y: -0.135, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3734344071454661171}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -127}
 --- !u!1 &927543787195281665
 GameObject:
   m_ObjectHideFlags: 0
@@ -65,6 +96,8 @@ Transform:
   - {fileID: 856974035914153389}
   - {fileID: 2913676899267844439}
   - {fileID: 3383331365616509147}
+  - {fileID: 8931146332644079736}
+  - {fileID: 7896696550580854238}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -137,8 +170,10 @@ MonoBehaviour:
   m_CharacterType: 2
   m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
   m_TerminateFxSize: 1.5
-  m_ShootingOnStart: 1
   m_Projectile: {fileID: 3002673282031773648}
+  m_ItemDropInfos:
+  - m_Prefab: {fileID: 3894070068890892964, guid: 80125f45741144e189db446e98f60437, type: 3}
+    m_DropRate: 100
 --- !u!60 &8353720146018398840
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -225,6 +260,37 @@ Transform:
   m_Father: {fileID: 3734344071454661171}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -150}
+--- !u!1 &6750154624786895986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8931146332644079736}
+  m_Layer: 0
+  m_Name: p3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8931146332644079736
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6750154624786895986}
+  m_LocalRotation: {x: 0, y: 0, z: 0.89493436, w: 0.44619772}
+  m_LocalPosition: {x: -0.4, y: -0.135, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3734344071454661171}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 127}
 --- !u!1001 &1654434676866182001
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -298,7 +364,7 @@ PrefabInstance:
       objectReference: {fileID: 3625497926282110751, guid: 6ad73cedfffc042ac887b58c8e6810b3, type: 3}
     - target: {fileID: 4566114432261622945, guid: 5e57ac1fdd2094084af49ae8d5d00a0f, type: 3}
       propertyPath: m_ProjectilePositionTransforms.Array.size
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4566114432261622945, guid: 5e57ac1fdd2094084af49ae8d5d00a0f, type: 3}
       propertyPath: m_ProjectilePositionTransforms.Array.data[0]
@@ -308,6 +374,14 @@ PrefabInstance:
       propertyPath: m_ProjectilePositionTransforms.Array.data[1]
       value: 
       objectReference: {fileID: 3383331365616509147}
+    - target: {fileID: 4566114432261622945, guid: 5e57ac1fdd2094084af49ae8d5d00a0f, type: 3}
+      propertyPath: m_ProjectilePositionTransforms.Array.data[2]
+      value: 
+      objectReference: {fileID: 8931146332644079736}
+    - target: {fileID: 4566114432261622945, guid: 5e57ac1fdd2094084af49ae8d5d00a0f, type: 3}
+      propertyPath: m_ProjectilePositionTransforms.Array.data[3]
+      value: 
+      objectReference: {fileID: 7896696550580854238}
     - target: {fileID: 4820523085532210469, guid: 5e57ac1fdd2094084af49ae8d5d00a0f, type: 3}
       propertyPath: m_Name
       value: missile.projectile

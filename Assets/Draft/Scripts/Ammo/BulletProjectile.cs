@@ -18,12 +18,10 @@ public class BulletProjectile : ProjectileBase
 
     public override void Shoot()
     {
-        Debug.Log("Shoot>>>>>");
 
         if(Time.time - _CountTime < m_Delay && _CountTime > 0) return;
         _CountTime = Time.time;
 
-        Debug.Log("<<<<<Shoot");
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
         { 
             var go = ObjectPoolingManager.CreateObject($"bullet_{GetInstanceID()}", m_AmmoPrefab);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Modules.Utilities;
 using UniRx;
 using UnityEngine;
@@ -33,7 +34,6 @@ public class EnemyFollowGroupController : GameEventBase
                     ShootAll(2f, 4);
             }
         }).AddTo(this);
-        StartEvent();
     }
 
     private CompositeDisposable _CompositeDisposable;
@@ -61,6 +61,13 @@ public class EnemyFollowGroupController : GameEventBase
 
         _CompositeDisposable.Add(Observable.EveryLateUpdate().Subscribe(_ =>
         {
+            if (m_EnemyList.FirstOrDefault(_ => _.IsAlive()) == null)
+            {
+                //when no more enemy is alive 
+                StopEvent();
+            }
+
+            
             for (int i = 0; i < m_Max; i++)
             {
                 var enemy = m_EnemyList[i];

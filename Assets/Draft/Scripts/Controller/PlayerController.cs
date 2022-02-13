@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : CharacterBase
 {
+    [SerializeField] private int m_Life = 5;
     [SerializeField] private float m_RelifeHP = 1f;
     [SerializeField] private float m_Speed = 2f;
     
@@ -22,12 +23,14 @@ public class PlayerController : CharacterBase
     [SerializeField] private BulletProjectile m_BulletProjectile;
     [SerializeField] private MissileProjectile m_MissileProjectile;
 
+    
     private Transform _Transform;
     private Vector2 _UpdatePosition;
     private SpriteRenderer m_SpriteRenderer;
     private Collider2D _Collider2D;
     private Vector2 _InputMovementPos;
     private bool _EnableMove;
+    private bool _EnableMissile;
 
     public static PlayerController  Instance { get; private set; }
 
@@ -77,49 +80,34 @@ public class PlayerController : CharacterBase
     private void Relife()
     {
         _EnableMove = false;
-        
+        m_SpriteRenderer.enabled = true;
+        _Collider2D.enabled = true;
+        SetHealthPower(m_RelifeHP);
         _Transform.position = new Vector3(0, -7, 0);
         m_RelifeSpriteRenderer.color = Color.white;
-        m_ShieldSpriteRenderer.color = Color.white;
         _UpdatePosition = new Vector3(0, -3.4f, 0);
+        EnableShield();
         _Transform.LerpPosition(1000, _UpdatePosition,false).Subscribe(_ =>
         {
             var color = m_RelifeSpriteRenderer.color;
-            m_SpriteRenderer.enabled = true;
-
+            _EnableMove = true;
+            m_BulletProjectile.ShootAuto();
+            //extra
+            //  m_MissileProjectile.ShootAuto();
             LerpThread.FloatLerp(300, 1, 0).Subscribe(_value =>
             {
                 color.a = _value;
                 m_RelifeSpriteRenderer.color = color;
+                        
             }, () =>
-            {
-                 SetHealthPower(m_RelifeHP);
-             //   m_BulletProjectile.ShootAuto();
-            //extra
-              //  m_MissileProjectile.ShootAuto();
+            {      
 
-                _EnableMove = true;
-                Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(_ =>
-                {
-                    var shieldColor = m_ShieldSpriteRenderer.color;
-
-                    LerpThread.FloatLerp(300, 1, 0).Subscribe(_value =>
-                    {
-                        shieldColor.a = _value;
-                        m_ShieldSpriteRenderer.color = shieldColor;
-                    }, () =>
-                    {      
-                        _Collider2D.enabled = true;
-
-                    });
-
-
-                }).AddTo(this);
-
+            }).AddTo(this);
+            
 
             }).AddTo(this);
 
-        }).AddTo(this);
+       
     }
     private Vector3 ClampAreaScreen(Vector3 _input)
     {
@@ -137,21 +125,48 @@ public class PlayerController : CharacterBase
 
     public void EnableMissileProjectile()
     {
+        if (_EnableMissile) return;
+        _EnableMissile = true;
         m_MissileProjectile.ShootAuto();
     }
-    
+
+    private IDisposable ShieldDisposable;
+    public void EnableShield(int time = 5000)
+    {
+        m_Immortal = true;
+        ShieldDisposable?.Dispose();
+        var color = m_ShieldSpriteRenderer.color = Color.white;
+
+        ShieldDisposable = Observable.Timer(TimeSpan.FromMilliseconds(time - 300)).Subscribe(_ =>
+        {
+            ShieldDisposable?.Dispose();
+            ShieldDisposable =LerpThread.FloatLerp(300, 1, 0).Subscribe(_value =>
+            {
+                color.a = _value;
+                m_ShieldSpriteRenderer.color = color;
+            }, () =>
+            {
+                m_Immortal = false;
+
+            }).AddTo(this);
+        }).AddTo(this);
+        
+       
+    }
     
     protected override void Terminate()
     {
         base.Terminate();
-
+        m_Life--;
+        
         m_SpriteRenderer.enabled = false;
         _Collider2D.enabled = false;
         _Transform.position = new Vector3(0, -7, 0);
         m_BulletProjectile.StopShoot();
         m_MissileProjectile.StopShoot();
+        _EnableMissile = false;
         
-        Observable.Timer(TimeSpan.FromMilliseconds(3000)).Subscribe(_ => Relife()).AddTo(this);
+        Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ => Relife()).AddTo(this);
        
     }
 
