@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Draft/Scenes/preload.unity
+    guid: df6f813d877cc474dbca70526df30fea
+  - enabled: 1
+    path: Assets/Draft/Scenes/menu.unity
+    guid: 4a55249d92f824b83924c3f9198df7f4
+  - enabled: 1
     path: Assets/Draft/Scenes/gameplay.unity
     guid: f918199f34c094b5c912c9e78cba4638
   m_configObjects:

@@ -33,10 +33,11 @@ public class MissileProjectile : ProjectileBase
 
     public override void Shoot()
     {
-
-        if (Time.time - _CountTime < m_Delay && _CountTime > 0) return;
+        if(Time.time - _CountTime < m_Delay && _CountTime > 0) return;
         _CountTime = Time.time;
-       
+        
+        if(m_ShootingAudio != null)m_ShootingAudio.Play();
+
         FindTarget();
 
 
@@ -146,8 +147,8 @@ public class MissileProjectile : ProjectileBase
                 if (_MarkingInfos[i].m_MarkFx == null && m_MarkingFxPrefab != null)
                 {
                     _MarkingInfos[i].m_MarkFx = ObjectPoolingManager.CreateObject("locktarget",
-                        m_MarkingFxPrefab, detectTarget.m_Transform.position, detectTarget.m_Transform.rotation,detectTarget.m_Transform);
-
+                        m_MarkingFxPrefab, detectTarget.m_Transform.position, detectTarget.m_Transform.rotation,
+                        detectTarget.m_Transform);
                 }
             }
         }

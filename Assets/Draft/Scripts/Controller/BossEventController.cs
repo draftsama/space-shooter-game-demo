@@ -21,7 +21,6 @@ public class BossEventController : GameEventBase
     
     [SerializeField] private Transform m_AxisProjectile1;
     [SerializeField] private Transform m_AxisProjectile2;
-    [SerializeField] private float m_AxisProjectileRotateSpeed = 100f;
 
     [SerializeField] private MovementQueueController m_MovementQueueController;
     [SerializeField] private bool m_LoopMovement = false;
@@ -50,7 +49,7 @@ public class BossEventController : GameEventBase
                 if (_response.m_index == 1 || _response.m_index == 3)
                 {
                   //  ShootPattern1(_loopTarget:1);
-                    BossShootPattern(_loopTarget:2,repeatTime:0.5f);
+                    BossShootPattern(_loopTarget:3,repeatTime:0.5f);
 
                 }
                 else if (_response.m_index == 5) 

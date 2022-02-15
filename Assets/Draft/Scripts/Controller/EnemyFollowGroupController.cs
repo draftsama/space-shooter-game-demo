@@ -71,7 +71,7 @@ public class EnemyFollowGroupController : GameEventBase
             for (int i = 0; i < m_Max; i++)
             {
                 var enemy = m_EnemyList[i];
-
+                if(enemy == null)continue;
                 if (i == 0)
                 {
                     var position = enemy.m_Transform.position;
@@ -94,6 +94,7 @@ public class EnemyFollowGroupController : GameEventBase
     public override void StopEvent()
     {
         base.StopEvent();
+        m_MovementQueueController.ResetPosition();
         _CompositeDisposable?.Dispose();
     }
 

@@ -11,6 +11,8 @@ public class ProjectileBase : MonoBehaviour
     [SerializeField] protected List<Transform> m_ProjectilePositionTransforms;
     [SerializeField] protected float m_Delay = 0.2f;
     [SerializeField] protected CharacterBase.CharacterType m_Shooter;
+    [SerializeField] protected AudioSource m_ShootingAudio;
+
     protected float _CountTime = 0;
     protected IDisposable _UpdateDisposable;
 
@@ -27,6 +29,7 @@ public class ProjectileBase : MonoBehaviour
     }
     public virtual void Shoot()
     {
+
     }
     public virtual void ShootAuto()
     {

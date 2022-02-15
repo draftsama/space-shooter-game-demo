@@ -21,6 +21,8 @@ public class BulletProjectile : ProjectileBase
 
         if(Time.time - _CountTime < m_Delay && _CountTime > 0) return;
         _CountTime = Time.time;
+        
+        if(m_ShootingAudio != null)m_ShootingAudio.Play();
 
         for (int i = 0; i < m_ProjectilePositionTransforms.Count; i++)
         { 

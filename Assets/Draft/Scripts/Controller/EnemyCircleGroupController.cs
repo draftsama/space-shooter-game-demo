@@ -110,9 +110,9 @@ public class EnemyCircleGroupController : GameEventBase
         for (int i = 0; i < m_EnemyList.Count; i++)
         {
             var enemy = m_EnemyList[i];
-            // if (!enemy.IsAlive())
-            //     continue;
-            //
+            if (enemy == null)
+                continue;
+            
 
             var angle = (_AnglePart * i) + _Axis;
             var rot = Quaternion.Euler(0, 0, angle);
@@ -215,7 +215,9 @@ public class EnemyCircleGroupController : GameEventBase
         
         m_MovementQueueController.ResetPosition();
         foreach (var enemy in m_EnemyList)
-        {
+        { 
+            if(enemy == null)continue;
+            ;
             enemy.transform.position = _Transform.position;
             enemy.gameObject.SetActive(false);
         }

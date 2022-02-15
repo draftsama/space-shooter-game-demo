@@ -9,6 +9,7 @@ public class AmmoBase : MonoBehaviour
 {
    
     [SerializeField]public float m_Damage = 100f;
+    [SerializeField]public int m_ScoreAdd = 5;
     [SerializeField]protected CharacterBase.CharacterType m_Shooter = CharacterBase.CharacterType.None;
     [SerializeField]protected float m_Speed = 300f;
     [SerializeField] private GameObject m_TerminateFxPrefab;
@@ -58,9 +59,9 @@ public class AmmoBase : MonoBehaviour
     }
     public void Terminate()
     {
-
-        CreateTerminateFx(_Transform);
         
+        CreateTerminateFx(_Transform);
+        if(m_Shooter == CharacterBase.CharacterType.Player)PlayerController.Instance.AddScoreValue(m_ScoreAdd);
         OnTerminate?.Invoke(gameObject);
         m_Shooter = CharacterBase.CharacterType.None;
     }

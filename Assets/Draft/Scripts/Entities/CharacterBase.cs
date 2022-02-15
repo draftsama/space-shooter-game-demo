@@ -45,6 +45,7 @@ public class CharacterBase : MonoBehaviour
                 if (ammo.GetShooterType() == CharacterType.Player && m_CharacterType == CharacterType.Enemy || 
                     ammo.GetShooterType() == CharacterType.Enemy && m_CharacterType == CharacterType.Player)
                 {
+                    
                     ammo.Terminate();
                     if(!m_Immortal)
                         ReductHealthPower(ammo.m_Damage);
@@ -57,6 +58,7 @@ public class CharacterBase : MonoBehaviour
             if (characterBase != null && m_CharacterType == CharacterType.Player &&
                 characterBase.m_CharacterType == CharacterType.Enemy)
             {
+                //when player hit enemy
                 if(!m_Immortal)
                     ReductHealthPower(m_HealthPower);
             }

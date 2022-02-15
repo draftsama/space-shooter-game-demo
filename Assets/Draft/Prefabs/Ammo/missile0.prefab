@@ -227,6 +227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Damage: 200
+  m_ScoreAdd: 15
   m_Shooter: 0
   m_Speed: 150
   m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}

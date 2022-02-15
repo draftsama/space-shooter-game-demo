@@ -32,12 +32,17 @@ public class PlayerController : CharacterBase
     private bool _EnableMove;
     private bool _EnableMissile;
 
+    public ReactiveProperty<int> m_ReActiveLifeValue;
+    public int m_Score { get; private set; }
+
     public static PlayerController  Instance { get; private set; }
 
     protected override void Awake()
     {
         base.Awake();
         Instance = this;
+        m_ReActiveLifeValue.SetValueAndForceNotify(m_Life);
+
     }
 
     private void OnDestroy()
@@ -47,13 +52,26 @@ public class PlayerController : CharacterBase
 
     protected override void Start()
     {
+
+        m_ReActiveLifeValue.Subscribe(_ =>
+        {
+            UIStatusBar.Instance.SetLife(_);
+            if (_ <= 0)
+            {
+                Debug.Log("Game over");
+            }
+        }).AddTo(this);
+
+        m_Score = 0;
+        
+        
         _Transform = transform;
         _UpdatePosition = transform.position;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
         _Collider2D = GetComponent<Collider2D>();
         InputManager.Instance.OnInputMovement().Subscribe(_=>_InputMovementPos = _).AddTo(this);
        
-        Relife();
+      
         
         Observable.EveryUpdate().Subscribe(_ =>
         {
@@ -77,7 +95,7 @@ public class PlayerController : CharacterBase
         }).AddTo(this);
     }
 
-    private void Relife()
+    public void Relife()
     {
         _EnableMove = false;
         m_SpriteRenderer.enabled = true;
@@ -86,12 +104,12 @@ public class PlayerController : CharacterBase
         _Transform.position = new Vector3(0, -7, 0);
         m_RelifeSpriteRenderer.color = Color.white;
         _UpdatePosition = new Vector3(0, -3.4f, 0);
-        EnableShield();
+        EnableShield(3000);
         _Transform.LerpPosition(1000, _UpdatePosition,false).Subscribe(_ =>
         {
             var color = m_RelifeSpriteRenderer.color;
             _EnableMove = true;
-            m_BulletProjectile.ShootAuto();
+           m_BulletProjectile.ShootAuto();
             //extra
             //  m_MissileProjectile.ShootAuto();
             LerpThread.FloatLerp(300, 1, 0).Subscribe(_value =>
@@ -108,6 +126,23 @@ public class PlayerController : CharacterBase
             }).AddTo(this);
 
        
+    }
+
+    public void MissionClear(Action _onCompleted)
+    {
+        m_Immortal = true;
+        _EnableMove = false;
+        _Collider2D.enabled = false;
+        m_BulletProjectile.StopShoot();
+        m_MissileProjectile.StopShoot();
+        _EnableMissile = false;
+        
+        var target = new Vector3(_Transform.position.x, 7.8f, _Transform.position.y);
+        Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(_ =>
+        {
+            _Transform.LerpPosition(3000, target, false).Subscribe(_ => { _onCompleted?.Invoke(); }).AddTo(this);
+        }).AddTo(this);
+
     }
     private Vector3 ClampAreaScreen(Vector3 _input)
     {
@@ -153,12 +188,23 @@ public class PlayerController : CharacterBase
         
        
     }
-    
+
+    public void AddLifeValue(int _life)
+    {
+        m_ReActiveLifeValue.SetValueAndForceNotify(m_ReActiveLifeValue.Value +_life);
+
+    }
+    public void AddScoreValue(int _scoreAdd)
+    {
+        m_Score += _scoreAdd;
+        UIStatusBar.Instance.AddScore(_scoreAdd);
+
+    }
+
     protected override void Terminate()
     {
         base.Terminate();
-        m_Life--;
-        
+        AddLifeValue(-1);
         m_SpriteRenderer.enabled = false;
         _Collider2D.enabled = false;
         _Transform.position = new Vector3(0, -7, 0);
@@ -166,7 +212,8 @@ public class PlayerController : CharacterBase
         m_MissileProjectile.StopShoot();
         _EnableMissile = false;
         
-        Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ => Relife()).AddTo(this);
+        if(m_ReActiveLifeValue.Value >0)
+             Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(_ => Relife()).AddTo(this);
        
     }
 

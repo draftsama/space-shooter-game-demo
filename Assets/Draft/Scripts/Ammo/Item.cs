@@ -4,18 +4,22 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-public class Item : MonoBehaviour,IPoolObjectEvent
+public class Item : MonoBehaviour, IPoolObjectEvent
 {
     public enum ItemType
     {
-        Missile,Shield 
+        Missile,
+        Shield,
+        Life
     }
+
     private Transform _Transform;
-    [SerializeField]private ItemType m_ItemType = ItemType.Missile;
-   
+
+    [SerializeField] private ItemType m_ItemType = ItemType.Missile;
+    [SerializeField] public int m_ScoreAdd = 100;
+
     void Start()
     {
-       
     }
 
     private Vector3 ClampAreaScreen(Vector3 _input)
@@ -37,16 +41,20 @@ public class Item : MonoBehaviour,IPoolObjectEvent
         var player = other.gameObject.GetComponent<PlayerController>();
         if (player)
         {
-            if(m_ItemType == ItemType.Missile)
+            
+            if (m_ItemType == ItemType.Missile)
                 PlayerController.Instance.EnableMissileProjectile();
-            else if(m_ItemType == ItemType.Shield)
+            else if (m_ItemType == ItemType.Shield)
                 PlayerController.Instance.EnableShield();
-
+            else if (m_ItemType == ItemType.Life)
+                PlayerController.Instance.AddLifeValue(1);
+            PlayerController.Instance.AddScoreValue(m_ScoreAdd);
             ObjectPoolingManager.Kill(gameObject);
         }
     }
 
     private IDisposable UpdateDisposable;
+
     public void OnStartObject()
     {
         _Transform = transform;
@@ -55,12 +63,12 @@ public class Item : MonoBehaviour,IPoolObjectEvent
 
         var areaHeight = 2f * Camera.main.orthographicSize;
         var areaWidth = areaHeight * Camera.main.aspect;
-        var bottomPos = -(areaHeight / 2f) -0.5f;
+        var bottomPos = -(areaHeight / 2f) - 0.5f;
 
-        UpdateDisposable =  Observable.EveryUpdate().Subscribe(_ =>
-        { 
-            _Transform.position += Vector3.down  * Time.deltaTime;
-            
+        UpdateDisposable = Observable.EveryUpdate().Subscribe(_ =>
+        {
+            _Transform.position += Vector3.down * Time.deltaTime;
+
             _Transform.Rotate(Vector3.forward, 100f * Time.deltaTime);
 
             if (_Transform.position.y < bottomPos)
