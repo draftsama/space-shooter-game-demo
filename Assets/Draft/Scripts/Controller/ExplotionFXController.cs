@@ -4,25 +4,29 @@ using System.Collections.Generic;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class ExplotionFXController : MonoBehaviour
+namespace Draft.Controller
 {
-    private Animator m_Animator;
-    private IDisposable _Disposable;
-
-    void OnEnable()
+    public class ExplotionFXController : MonoBehaviour
     {
-        transform.rotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0, 360));
-        m_Animator = GetComponent<Animator>();
-        var trigger = m_Animator.GetBehaviour<ObservableStateMachineTrigger>();
+        private Animator m_Animator;
+        private IDisposable _Disposable;
 
-        if (trigger != null)
+        void OnEnable()
         {
-            _Disposable?.Dispose();
-            _Disposable = trigger.OnStateExitAsObservable().Subscribe(_ =>
+            transform.rotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
+            m_Animator = GetComponent<Animator>();
+            var trigger = m_Animator.GetBehaviour<ObservableStateMachineTrigger>();
+
+            if (trigger != null)
             {
-                ObjectPoolingManager.Kill(gameObject);
-            }).AddTo(this);
+                _Disposable?.Dispose();
+                _Disposable = trigger.OnStateExitAsObservable().Subscribe(_ =>
+                {
+                    ObjectPoolingManager.Kill(gameObject);
+                }).AddTo(this);
+            }
         }
     }
 }

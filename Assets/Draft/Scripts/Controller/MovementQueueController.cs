@@ -1,22 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Modules.Utilities;
 using UniRx;
-using UnityEditor.UIElements;
 using UnityEngine;
 
 #if UNITY_EDITOR_64 || UNITY_EDITOR || UNITY_EDITOR_OSX
 using UnityEditor;
 
-[CustomEditor(typeof(MovementQueueController))]
+[CustomEditor(typeof(Draft.Controller.MovementQueueController))]
 public class MovementQueueControllerEditor : Editor
 {
-    private MovementQueueController _Instance;
+    private Draft.Controller.MovementQueueController _Instance;
 
     private void OnEnable()
     {
-        _Instance = target as MovementQueueController;
+        _Instance = target as Draft.Controller.MovementQueueController;
     }
 
     public override void OnInspectorGUI()
@@ -41,57 +39,59 @@ public class MovementQueueControllerEditor : Editor
 }
 #endif
 
-public class MovementQueueController : MonoBehaviour
+namespace Draft.Controller
 {
-    [SerializeField] private bool m_PlayOnStart;
-    [SerializeField] private bool m_Loop;
-
-    [SerializeField] private List<MovementInfo> m_MovementInfos = new List<MovementInfo>();
-
-    private Transform _Transform;
-
-    private Action<MovementResponse> MovementResponseAction;
-    private Action<Unit> EndMovementAction;
-
-    public enum Status
+    public class MovementQueueController : MonoBehaviour
     {
-        None,
-        PreStart,
-        Start,
-        End
-    }
+        [SerializeField] private bool m_PlayOnStart;
+        [SerializeField] private bool m_Loop;
+        [SerializeField] private List<MovementInfo> m_MovementInfos = new List<MovementInfo>();
 
-    private void Awake()
-    {
-        _Transform = transform;
+        private Transform _Transform;
+        private Action<MovementResponse> MovementResponseAction;
+        private Action<Unit> EndMovementAction;
 
-    }
+        public enum Status
+        {
+            None,
+            PreStart,
+            Start,
+            End
+        }
 
-    public int GetMaxMovement() => m_MovementInfos.Count;
-    void Start()
-    {
+        private void Awake()
+        {
+            _Transform = transform;
 
-        if (m_PlayOnStart) PlayMovement(m_Loop).AddTo(this);
-    }
-    
-    public IObservable<MovementResponse> OnMovementUpdateStatus()
-    {
-        return Observable.FromEvent<MovementResponse>(_e => MovementResponseAction += _e,
-            _e => MovementResponseAction -= _e);
-    }
-    public IObservable<Unit> OnEndMovement()
-    {
-        return Observable.FromEvent<Unit>(_e => EndMovementAction += _e,
-            _e => EndMovementAction -= _e);
-    }
+        }
 
-    public void ResetPosition()
-    {
-        _Transform.position = m_MovementInfos[0].m_PositionTarget;
-    }
-    public IDisposable PlayMovement(bool _loop)
-    {
-      
+        public int GetMaxMovement() => m_MovementInfos.Count;
+
+        void Start()
+        {
+            if (m_PlayOnStart) PlayMovement(m_Loop).AddTo(this);
+        }
+
+        public IObservable<MovementResponse> OnMovementUpdateStatus()
+        {
+            return Observable.FromEvent<MovementResponse>(_e => MovementResponseAction += _e,
+                _e => MovementResponseAction -= _e);
+        }
+
+        public IObservable<Unit> OnEndMovement()
+        {
+            return Observable.FromEvent<Unit>(_e => EndMovementAction += _e,
+                _e => EndMovementAction -= _e);
+        }
+
+        public void ResetPosition()
+        {
+            _Transform.position = m_MovementInfos[0].m_PositionTarget;
+        }
+
+        public IDisposable PlayMovement(bool _loop)
+        {
+
             float timecount = 0;
             int index = 0;
 
@@ -150,6 +150,7 @@ public class MovementQueueController : MonoBehaviour
                             MovementResponseAction?.Invoke(MovementResponse.GetResponse(index,
                                 status));
                         }
+
                         status = Status.None;
                         startPos = movementInfo.m_PositionTarget;
                         _Transform.position = movementInfo.m_PositionTarget;
@@ -160,38 +161,39 @@ public class MovementQueueController : MonoBehaviour
             });
 
             return disposable;
-    }
+        }
 
-    public void AddMovement(Vector3 _vector3)
-    {
-        MovementInfo info;
-        info.m_PositionTarget = _vector3;
-        info.m_DelayTime = 0.5f;
-        info.m_DurationTime = 1f;
-        info.m_Ease = Easing.Ease.EaseInOutQuad;
-        m_MovementInfos.Add(info);
-    }
-
-    [System.Serializable]
-    public struct MovementInfo
-    {
-        [SerializeField] public float m_DelayTime;
-        [SerializeField] public float m_DurationTime;
-        [SerializeField] public Easing.Ease m_Ease;
-        [SerializeField] public Vector3 m_PositionTarget;
-    }
-
-    public struct MovementResponse
-    {
-        [SerializeField] public int m_index;
-        [SerializeField] public Status m_Status;
-
-        public static MovementResponse GetResponse(int _index, Status _status)
+        public void AddMovement(Vector3 _vector3)
         {
-            MovementResponse respones;
-            respones.m_index = _index;
-            respones.m_Status = _status;
-            return respones;
+            MovementInfo info;
+            info.m_PositionTarget = _vector3;
+            info.m_DelayTime = 0.5f;
+            info.m_DurationTime = 1f;
+            info.m_Ease = Easing.Ease.EaseInOutQuad;
+            m_MovementInfos.Add(info);
+        }
+
+        [Serializable]
+        public struct MovementInfo
+        {
+            [SerializeField] public float m_DelayTime;
+            [SerializeField] public float m_DurationTime;
+            [SerializeField] public Easing.Ease m_Ease;
+            [SerializeField] public Vector3 m_PositionTarget;
+        }
+
+        public struct MovementResponse
+        {
+            [SerializeField] public int m_index;
+            [SerializeField] public Status m_Status;
+
+            public static MovementResponse GetResponse(int _index, Status _status)
+            {
+                MovementResponse respones;
+                respones.m_index = _index;
+                respones.m_Status = _status;
+                return respones;
+            }
         }
     }
 }

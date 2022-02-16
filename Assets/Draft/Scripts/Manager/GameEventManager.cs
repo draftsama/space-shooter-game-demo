@@ -4,70 +4,73 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-public class GameEventManager : MonoBehaviour
+namespace Draft.Manager
 {
-    [SerializeField] private List<GameEventInfo> m_GameEventInfoList = new List<GameEventInfo>();
-    [SerializeField] private int m_Index = 0;
-    private GameEventInfo _CurrentEvent;
-    private Action<Unit> _OnEndEvent;
-    private Action<int> _OnUpdateEvent;
-
-    void Start()
+    public class GameEventManager : MonoBehaviour
     {
-        m_Index = 0;
-        _CurrentEvent = m_GameEventInfoList[m_Index];
-    }
+        [SerializeField] private List<GameEventInfo> m_GameEventInfoList = new List<GameEventInfo>();
+        [SerializeField] private int m_Index = 0;
+        private GameEventInfo _CurrentEvent;
+        private Action<Unit> _OnEndEvent;
+        private Action<int> _OnUpdateEvent;
 
-    public void PlayGameEvent(int _index = 0)
-    {
-        m_Index = _index;
-        _CurrentEvent = m_GameEventInfoList[m_Index];
-        Debug.Log(_CurrentEvent.m_GameEventHandler.name);
-        IDisposable disposable = null;
-        _OnUpdateEvent?.Invoke(m_Index);
-        disposable = Observable.Timer(TimeSpan.FromMilliseconds(_CurrentEvent.m_Delay)).Subscribe(_ =>
+        void Start()
         {
-            disposable?.Dispose();
+            m_Index = 0;
+            _CurrentEvent = m_GameEventInfoList[m_Index];
+        }
 
-            _CurrentEvent.m_GameEventHandler.StartEvent();
-            disposable = _CurrentEvent.m_GameEventHandler.OnStopEventAsObservable().Subscribe(_ =>
+        public void PlayGameEvent(int _index = 0)
+        {
+            m_Index = _index;
+            _CurrentEvent = m_GameEventInfoList[m_Index];
+            Debug.Log(_CurrentEvent.m_GameEventHandler.name);
+            IDisposable disposable = null;
+            _OnUpdateEvent?.Invoke(m_Index);
+            disposable = Observable.Timer(TimeSpan.FromMilliseconds(_CurrentEvent.m_Delay)).Subscribe(_ =>
             {
                 disposable?.Dispose();
-                _index++;
-                if (_index < m_GameEventInfoList.Count)
+
+                _CurrentEvent.m_GameEventHandler.StartEvent();
+                disposable = _CurrentEvent.m_GameEventHandler.OnStopEventAsObservable().Subscribe(_ =>
                 {
-                    //next
-                    Debug.Log($"Next Event {_index}");
-                    PlayGameEvent(_index);
-                }
-                else
-                {
-                    _OnEndEvent?.Invoke(default);
-                    Debug.Log("End Event");
-                }
+                    disposable?.Dispose();
+                    _index++;
+                    if (_index < m_GameEventInfoList.Count)
+                    {
+                        //next
+                        Debug.Log($"Next Event {_index}");
+                        PlayGameEvent(_index);
+                    }
+                    else
+                    {
+                        _OnEndEvent?.Invoke(default);
+                        Debug.Log("End Event");
+                    }
+                }).AddTo(this);
             }).AddTo(this);
-        }).AddTo(this);
-    }
+        }
 
-    public int GetCountEvent()
-    {
-        return m_GameEventInfoList.Count;
-    }
+        public int GetCountEvent()
+        {
+            return m_GameEventInfoList.Count;
+        }
 
-    public IObservable<Unit> OnEndEventAsObservable()
-    {
-        return Observable.FromEvent<Unit>(_e => _OnEndEvent += _e, _e => _OnEndEvent -= _e);
-    }
+        public IObservable<Unit> OnEndEventAsObservable()
+        {
+            return Observable.FromEvent<Unit>(_e => _OnEndEvent += _e, _e => _OnEndEvent -= _e);
+        }
 
-    public IObservable<int> OnUpdateEventAsObservable()
-    {
-        return Observable.FromEvent<int>(_e => _OnUpdateEvent += _e, _e => _OnUpdateEvent -= _e);
-    }
+        public IObservable<int> OnUpdateEventAsObservable()
+        {
+            return Observable.FromEvent<int>(_e => _OnUpdateEvent += _e, _e => _OnUpdateEvent -= _e);
+        }
 
-    [System.Serializable]
-    public struct GameEventInfo
-    {
-        public int m_Delay;
-        public GameEventBase m_GameEventHandler;
+        [Serializable]
+        public struct GameEventInfo
+        {
+            public int m_Delay;
+            public GameEventBase m_GameEventHandler;
+        }
     }
 }

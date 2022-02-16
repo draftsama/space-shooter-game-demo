@@ -168,7 +168,7 @@ MonoBehaviour:
   m_HealthPower: 2000
   m_Immortal: 0
   m_CharacterType: 2
-  m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9ad2455d2b18643ccb3abbac476f922a, type: 3}
+  m_TerminateFxPrefab: {fileID: 528161803607714942, guid: 9d91adc0536f14994b6ef68de5c5c89b, type: 3}
   m_TerminateFxSize: 1.5
   m_Projectile: {fileID: 3002673282031773648}
   m_ItemDropInfos:

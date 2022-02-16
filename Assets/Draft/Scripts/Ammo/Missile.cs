@@ -1,46 +1,47 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Modules.Utilities;
-using UniRx;
 using UnityEngine;
 
-public class Missile : AmmoBase
+namespace Draft.Ammo
 {
-    [SerializeField]private CharacterBase m_Target;
-    [SerializeField]private float m_RotationSpeed = 50f;
-    
-    public void SetTarget(CharacterBase _target)
+    public class Missile : AmmoBase
     {
-        m_Target = _target;
-    }
-    protected override void FixedUpdate()
-    {
-        
-        var up = _Transform.up;
-        m_Rigidbody2D.velocity = up * m_Speed *Time.fixedDeltaTime;
+        [SerializeField] private CharacterBase m_Target;
+        [SerializeField] private float m_RotationSpeed = 50f;
 
-        if (m_Target != null && m_Target.IsAlive())
+        public void SetTarget(CharacterBase _target)
         {
-            var direction = (Vector2)m_Target.m_Transform.position - m_Rigidbody2D.position;
-            var rotAmount = -Vector3.Cross(direction.normalized, up).z;
-            m_Rigidbody2D.angularVelocity = rotAmount * m_RotationSpeed;
+            m_Target = _target;
         }
-        else
-        {
-            m_Rigidbody2D.angularVelocity = 0;
-        }
-        base.FixedUpdate();
-    }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        var ammo = other.gameObject.GetComponent<AmmoBase>();
-        if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy && ammo.GetShooterType() == CharacterBase.CharacterType.Player)
+        protected override void FixedUpdate()
         {
-            ammo.Terminate();
-            Terminate();
-    
+
+            var up = _Transform.up;
+            m_Rigidbody2D.velocity = up * m_Speed * Time.fixedDeltaTime;
+
+            if (m_Target != null && m_Target.IsAlive())
+            {
+                var direction = (Vector2)m_Target.m_Transform.position - m_Rigidbody2D.position;
+                var rotAmount = -Vector3.Cross(direction.normalized, up).z;
+                m_Rigidbody2D.angularVelocity = rotAmount * m_RotationSpeed;
+            }
+            else
+            {
+                m_Rigidbody2D.angularVelocity = 0;
+            }
+
+            base.FixedUpdate();
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            var ammo = other.gameObject.GetComponent<AmmoBase>();
+            if (ammo != null && m_Shooter == CharacterBase.CharacterType.Enemy &&
+                ammo.GetShooterType() == CharacterBase.CharacterType.Player)
+            {
+                ammo.Terminate();
+                Terminate();
+
+            }
         }
     }
 }

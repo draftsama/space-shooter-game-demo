@@ -1,17 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Bullet : AmmoBase
+namespace Draft.Ammo
 {
-    protected  override void FixedUpdate()
+    public class Bullet : AmmoBase
     {
-        m_Rigidbody2D.velocity =_Transform.up * m_Speed * Time.deltaTime;
+        protected  override void FixedUpdate()
+        {
+            m_Rigidbody2D.velocity =_Transform.up * m_Speed * Time.deltaTime;
 
-        base.FixedUpdate();
+            base.FixedUpdate();
        
+        }
+        
     }
-
-    
-   
 }
