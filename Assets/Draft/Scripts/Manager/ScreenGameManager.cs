@@ -12,7 +12,7 @@ namespace Draft.Manager
         {
             var res = Screen.currentResolution;
             var ratio = SCREEN_HEIGHT / SCREEN_WIDTH;
-            Screen.SetResolution(Mathf.RoundToInt(res.height * ratio), res.height, false);
+            Screen.SetResolution(Mathf.RoundToInt(res.height * ratio), res.height, true);
         }
 
     }
