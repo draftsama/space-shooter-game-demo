@@ -43,7 +43,7 @@ namespace Draft.UI
             Debug.Log($"PlayResult {_score}");
             m_IsShowing = true;
             _Disposable?.Dispose();
-            _Disposable = m_CanvasGroup.LerpAlpha(500, GlobalConstant.ALPHA_VALUE_VISIBLE, _useUnscaleTime: true,
+            _Disposable = m_CanvasGroup.LerpAlpha(500, GlobalConstant.ALPHA_VALUE_VISIBLE, _ignoreTimeScale: true,
                 () =>
                 {
                     _Disposable = m_LineTransform.LerpWidth(_LINE_WIDTH_TARGET, 500, Easing.Ease.EaseInOutQuad, true,
