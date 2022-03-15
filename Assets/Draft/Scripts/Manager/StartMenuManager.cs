@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using Modules.Utilities;
-using UniRx;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using UnityEngine.Events;
 
 namespace Draft.Manager
 {
@@ -13,51 +15,30 @@ namespace Draft.Manager
         [SerializeField] private Transform m_SpaceShipTransform;
         [SerializeField] private float m_Speed = 10f;
         [SerializeField] private float m_Radius = 2f;
+        [SerializeField] private UnityEngine.UI.Button m_Button;
 
+        private Action<int> _Action;
+
+        private int _Number = 0;
         void Start()
         {
+            var token = this.GetCancellationTokenOnDestroy();
             AudioManager.PlayBGM("start.menu", 0.5f);
-            FloatingAnimation(m_SpaceShipTransform, m_Speed, m_Radius).AddTo(this);
-            Observable.EveryUpdate().Where(_ => Input.anyKeyDown).Subscribe(_ =>
+
+            m_SpaceShipTransform.FloatingAnimationAsyncEnumerable(m_Speed, m_Radius).Subscribe(_ =>
+                {
+                    _Number++;
+                    _Action?.Invoke(_Number);
+                })
+                .AddTo(token);
+            UniTaskAsyncEnumerable.EveryUpdate().Where(_ => Input.anyKeyDown).ForEachAsync(_ =>
             {
                 SceneLoaderManager.Instance.GotoGame();
-            }).AddTo(this);
+            }, cancellationToken: token);
+            
         }
 
-        public IDisposable FloatingAnimation(Transform _transform, float _speed, float _radius,
-            Easing.Ease _ease = Easing.Ease.EaseInOutQuad, bool _useUnscaleTime = false)
-        {
-
-            float progress = 0;
-
-            Vector2 currentPos = _transform.position;
-            Vector2 startPos = _transform.position;
-            Vector2 targetPos = RandomPosition() + startPos;
-
-            Vector2 RandomPosition()
-            {
-                float angle = Random.Range(0, 360);
-                float randomRadius = Random.Range(0, _radius);
-                return Quaternion.Euler(0, 0, angle) * new Vector3(0, randomRadius, 0);
-            }
-
-            return Observable.EveryUpdate().Subscribe(_ =>
-            {
-                var deltaTime = _useUnscaleTime ? Time.unscaledDeltaTime : Time.deltaTime;
-                progress += deltaTime * _speed * 0.1f;
-                _transform.position =
-                    EasingFormula.EaseTypeVector(Easing.Ease.EaseInOutQuad, currentPos, targetPos, progress);
-
-
-                if (progress >= 1)
-                {
-                    targetPos = RandomPosition() + startPos;
-                    currentPos = _transform.position;
-                    progress = 0;
-                }
-            });
-        }
-
+      
 
     }
 
